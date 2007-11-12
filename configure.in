@@ -35,6 +35,25 @@ if test "$GCC" = "yes" -a "$set_more_warnings" != "no"; then
                 -Wunused -Werror"
 fi
 
+dnl *******************
+dnl *** Misc checks ***
+dnl *******************
+AC_CHECK_FUNCS(localtime)
+AC_CHECK_FUNCS(getopt)
+dnl ----------------------------------------------------------------------
+AC_CHECK_HEADERS([inttypes.h stdlib.h])
+AC_CHECK_HEADERS([net/if.h net/if_dl.h])
+AC_CHECK_HEADERS([sys/ioctl.h sys/sockio.h])
+AC_CHECK_HEADERS([crypt.h sys/ioctl.h dirent.h])
+AC_CHECK_HEADERS([vararg.h stdarg.h pthread.h])
+AC_CHECK_HEADERS([unistd.h sys/types.h sys/sendfile.h sys/signal.h])
+AC_CHECK_HEADERS([ctype.h sys/resource.h sys/socket.h sys/select.h])
+AC_CHECK_HEADERS([netinet/in.h], [], [],
+[#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+])
+
 AC_OUTPUT([
 	wseventsink.spec
 	Makefile

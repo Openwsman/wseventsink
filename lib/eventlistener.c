@@ -42,10 +42,12 @@
 #include "wsman-soap-envelope.h"
 #include "wsman-names.h"
 #include "wsman-soap-message.h"
+#include "wsman-xml-api.h"
 #include "eventlistener.h"
 
-#define PACKAGE "eventlistener"
-#define VERSION "0.0.1"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #define AUTHENTICATION_REALM "EVENTLISTENER"
 
@@ -110,22 +112,6 @@ void eventlistener_register_event_processor(eventlistener_event_processor_t even
 	listener->data = data;
 }
 
-static WsXmlDocH create_envelope(void)
-{
-	WsXmlDocH doc = NULL;
-	if ((doc = ws_xml_create_doc(XML_NS_SOAP_1_2, SOAP_ENVELOPE)) != NULL) {
-		WsXmlNodeH root = ws_xml_get_doc_root(doc);
-
-		if (root == NULL ||
-		    ws_xml_add_child(root, XML_NS_SOAP_1_2, "Header", NULL) == NULL ||
-		    ws_xml_add_child(root, XML_NS_SOAP_1_2, "Body", NULL) == NULL) {
-			ws_xml_destroy_doc(doc);
-			doc = NULL;
-		}
-	}
-	return doc;
-}
-
 
 static void accept_events_call(WsmanMessage *wsman_msg)
 {
@@ -137,8 +123,7 @@ static void accept_events_call(WsmanMessage *wsman_msg)
 	WsXmlNodeH header = ws_xml_get_soap_header(in_doc);
 	WsXmlNodeH acknode = ws_xml_get_child(header, 0, XML_NS_WS_MAN, WSM_ACKREQUESTED);
 	if(acknode) {
-	//	ackdoc = wsman_create_response_envelope(in_doc, NULL);
-		ackdoc = create_envelope();
+		ackdoc = ws_xml_create_soap_envelope();
 		messageid = ws_xml_get_node_text(ws_xml_get_child(header, 0, XML_NS_ADDRESSING, WSA_MESSAGE_ID));
 		header = ws_xml_get_soap_header(ackdoc);
 		ws_xml_add_child(header, XML_NS_ADDRESSING, WSA_TO, WSA_TO_ANONYMOUS);

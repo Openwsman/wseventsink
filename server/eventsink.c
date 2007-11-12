@@ -43,11 +43,11 @@ static int port = 80;
 static char *servicepath = "/eventsink";
 static int debug = 0;
 static int log_pid = 0;
-
+static char *output_file = NULL;
 
 static void usage(void)
 {
-	printf("eventsink [-p port] [-r service_path] [-d]\n");
+	printf("\n\neventsink [-p port] [-r service_path] [-d] [-o output_file]\n\n");
 }
 
 static void
@@ -77,15 +77,6 @@ debug_message_handler(const char *str,
 
 		u_free(log_msg);
 	}
-/*	if (level <= wsmand_options_get_syslog_level()) {
-		char *log_name = u_strdup_printf("wsmand[%d]", log_pid);
-
-		openlog(log_name, 0, LOG_DAEMON);
-		syslog(LOG_INFO, "%s", str);
-		closelog();
-		u_free(log_name);
-	}
-*/
 }
 
 
@@ -97,9 +88,8 @@ static void initialize_logging(void)
 
 static int print_events(WsXmlDocH indoc, void *data)
 {
-	char *buf;
-	int len;
-	ws_xml_dump_memory_enc(indoc,&buf,&len,"UTF-8");
+	FILE *f = stdout;
+        const char *filename = output_file;
 	struct tm *tm;
         time_t now;
         char timestr[128];
@@ -107,12 +97,24 @@ static int print_events(WsXmlDocH indoc, void *data)
         time(&now);
         tm = localtime(&now);
         strftime(timestr, 128, "%b %e %T", tm);
-
-        log_msg = u_strdup_printf("\t\t\033[22;32mAt %s received:\033[m \n%s\n",
-                        timestr, buf);
-        printf("%s",log_msg);
+	if (filename) {
+		f = fopen(filename, "a+");
+		if (f == NULL) {
+			error("Could not open file for writing");
+			return -1;
+                }
+        }
+	if(f == stdout)
+        	log_msg = u_strdup_printf("\t\t\033[22;32mAt %s received:\033[m \n\n",timestr);
+	else
+		log_msg = u_strdup_printf("At %s received:\n\n", timestr);
+        fprintf(f, "%s", log_msg);
+	ws_xml_dump_node_tree(f, ws_xml_get_doc_root(indoc));
+	fflush(f);
+	if (f != stdout) {
+		fclose(f);
+        }
         u_free(log_msg);
-	u_free(buf);
 	return 0;
 }
 
@@ -123,7 +125,7 @@ int main(int argc, char *argv[])
 		usage();
 		exit(0);
 	}
-	while(argc > 1 && (ch = getopt(argc, argv, "p:r:d"))!= -1) {
+	while(argc > 1 && (ch = getopt(argc, argv, "p:r:o:d"))!= -1) {
 		switch(ch) {
 			case 'p':
 				port = atoi(optarg);
@@ -133,6 +135,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'd':
 				debug = 1;
+				break;
+			case 'o':
+				output_file = optarg;
 				break;
 			default:
 				printf("Unrecognized option!\n");
