@@ -44,13 +44,13 @@
 #endif
 
 
-#define	SHTTPD_VERSION		"1.35"		/* Version			*/
+#define	SHTTPD_VERSION	"1.35"		/* Version			*/
 #ifndef CONFIG
 #define	CONFIG		"/usr/local/etc/shttpd.conf"	/* Configuration file		*/
 #endif /* CONFIG */
 #define	HTPASSWD	".htpasswd"	/* Passwords file name		*/
 #define	EXPIRE_TIME	3600		/* Expiration time, seconds	*/
-#define KEEP_ALIVE_TIME  2     /* keep connection, seconds */
+#define KEEP_ALIVE_TIME 2               /* keep connection, seconds     */
 #ifndef IO_MAX
 #define	IO_MAX		16384		/* Max request size		*/
 #endif /* IO_MAX */
@@ -83,12 +83,12 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <dlfcn.h>
-//#define	SSL_LIB				"/usr/lib/libssl.so"
-#define SSL_LIB             "libssl.so"
-#define	DIRSEP				'/'
-#define	O_BINARY			0
-#define	closesocket(a)			close(a)
-#define	ERRNO				errno
+//#define	SSL_LIB		"/usr/lib/libssl.so"
+#define SSL_LIB         "libssl.so"
+#define	DIRSEP		'/'
+#define	O_BINARY	0
+#define	closesocket(a)	close(a)
+#define	ERRNO		errno
 #define	NO_GUI
 
 #define	InitializeCriticalSection(x)	/* FIXME UNIX version is not MT safe */
@@ -933,7 +933,7 @@ shttpd_get_header(struct shttpd_arg_t *arg, const char *header_name)
 
 static void
 free_headers_hnode(hnode_t *n, void *arg) {
-	u_free(n->hash_key);
+	u_free((void *)n->hash_key);
 	u_free(n);
 }
 
@@ -1940,8 +1940,8 @@ checkauth(struct conn *c, const char *path)
 	}
 	*p = 0;
 
-	// use di.uri as a bufer. It's big ehough
-	l = ws_base64_decode(pp, p - pp, di.uri);
+	// use di.uri as a buffer. It's big enough
+	l = ws_base64_decode(pp, p - pp, di.uri, sizeof(di.uri));
 	if (l <= 0) {
 		return 0;
 	}
