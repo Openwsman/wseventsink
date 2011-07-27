@@ -1,33 +1,67 @@
-Name:           wseventsink
-Version:       @PACKAGE_VERSION@
-Release:        1
-License:        BSD
-Url:            http://www.openwsman.org/
-Source:         %{name}-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Group:          Applications/Management
-BuildRequires:  openwsman-devel pkgconfig curl-devel
-Requires:       openwsman curl
-Summary:        Opensource Implementation of WS-Management - Event Sink Utility
+#
+# spec file for package wseventsink (Version @PACKAGE_VERSION@)
+#
+# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
 
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
+# norootforbuild
+
+
+Name:           wseventsink
+BuildRequires:  gcc-c++ libwsman-devel pkgconfig
+%if 0%{?suse_version} > 1010
+BuildRequires:  libcurl-devel
+%else
+# SLE 10
+BuildRequires:  curl-devel
+%endif
+Version:        @PACKAGE_VERSION@
+Release:        1
+Url:            http://www.openwsman.org/
+License:        BSD3c
+Group:          System/Management
+Summary:        Opensource Implementation of WS-Management - Event Sink Handler
+Source:         %{name}-%{version}.tar.bz2
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
-Part of openwsman, an Opensource Implementation of WS-Management 
+Part of Openwsman, an Opensource Implementation of WS-Management
 
 
+
+Authors:
+--------
+    Liang Hou <houliang@intel.com>
 
 %prep
-%setup
+%setup -q -n %{name}-%{version}
 
 %build
-%configure 
-make
+sh ./bootstrap
+%configure --disable-static
+make %{?jobs:-j%jobs}
 
 %install
-make DESTDIR=%{buildroot} install
+make DESTDIR=$RPM_BUILD_ROOT install
+%{__rm} -rf $RPM_BUILD_ROOT/%{_libdir}/*a
+
 %clean
-rm -rf "$RPM_BUILD_ROOT"
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{_bindir}/wsman
+%{_bindir}/wseventsink
+%{_libdir}/libwseventlistener.so*
+
+%changelog
