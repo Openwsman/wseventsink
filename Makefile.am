@@ -1,4 +1,5 @@
 SUBDIRS = lib server
+EXTRA_DIST = bootstrap
 AUTOMAKE_OPTIONS = no-dist-gzip dist-bzip2
 
 package: dist
