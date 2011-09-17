@@ -2440,8 +2440,11 @@ do_init(const char *config_file, int argc, char *argv[])
 		ctx->port = 443;
 #endif
 	/* If document_root is not set, set it to current directory */
-	if (ctx->root[0] == '\0')
-		(void) getcwd(ctx->root, sizeof(ctx->root));
+	if (ctx->root[0] == '\0') {
+		char *dummy = getcwd(ctx->root, sizeof(ctx->root));
+		if (dummy != ctx->root)
+			elog(ERR_FATAL, "do_init: cannot getcwd");
+	}
 
 	debug("do_init: initialized context %p", ctx);
 
