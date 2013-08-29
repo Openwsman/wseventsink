@@ -126,8 +126,12 @@ int main(int argc, char *argv[])
 		usage();
 		exit(0);
 	}
-	while(argc > 1 && (ch = getopt(argc, argv, "p:r:o:d"))!= -1) {
+	while(argc > 1 && (ch = getopt(argc, argv, "p:r:o:d:h"))!= -1) {
 		switch(ch) {
+                        case 'h':
+                          usage();
+                          exit(0);
+                          break;
 			case 'p':
 				port = atoi(optarg);
 				break;
